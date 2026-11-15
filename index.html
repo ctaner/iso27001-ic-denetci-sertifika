@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ISO/IEC 27001 İç Denetçi Eğitimi – Sertifika</title>
+<meta name="description" content="ISO/IEC 27001:2022 İç Denetçi Eğitimi (14–15 Kasım 2026) katılımcıları için katılım ve başarı sertifikası oluşturma ve doğrulama sayfası.">
+<meta property="og:title" content="ISO/IEC 27001:2022 İç Denetçi Eğitimi – Sertifika">
+<meta property="og:description" content="Cemal Taner • 14–15 Kasım 2026 • Online canlı eğitim">
+<meta property="og:image" content="https://ctaner.github.io/iso27001-ic-denetci-sertifika/og-image.png">
+<meta property="og:type" content="website">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="mono">CT</div>
+  <h1>ISO/IEC 27001:2022 İç Denetçi Eğitimi</h1>
+  <p>Sertifika Merkezi • 14–15 Kasım 2026 • Online canlı eğitim</p>
+</header>
+<main>
+  <section id="login" class="card login">
+    <h2>Sertifikanızı oluşturun</h2>
+    <p>Size iletilen 8 karakterli kişisel kodu girin. Katılım ve başarı sertifikanız hazırlanır; PDF ve PNG olarak indirip LinkedIn'de paylaşabilirsiniz.</p>
+    <form id="f" autocomplete="off">
+      <label for="code">Kişisel kod</label>
+      <input id="code" type="text" maxlength="40" placeholder="ÖR. AB12CD34" inputmode="latin" spellcheck="false" required>
+      <button class="btn primary" type="submit" id="go">Sertifikamı göster</button>
+      <div id="msg" class="msg" role="status"></div>
+    </form>
+  </section>
+
+  <section id="result" hidden>
+    <div class="hello">
+      <h2 id="pname"></h2>
+      <p>Tebrikler! Sertifikalarınız aşağıda.</p>
+    </div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-t="B" aria-selected="true">Başarı Sertifikası</button>
+      <button class="tab" role="tab" data-t="K" aria-selected="false">Katılım Sertifikası</button>
+    </div>
+    <div class="card">
+      <div class="preview"><canvas id="cv" aria-label="Sertifika önizlemesi"></canvas></div>
+      <div class="actions">
+        <button class="btn navy" id="pdf">⬇ PDF indir</button>
+        <button class="btn gold" id="png">⬇ PNG indir</button>
+        <a class="btn li" id="liadd" target="_blank" rel="noopener">LinkedIn profiline ekle</a>
+        <a class="btn ghost" id="verify" target="_blank" rel="noopener">Doğrulama sayfası</a>
+      </div>
+      <div class="share">
+        <h3>LinkedIn'de paylaşın</h3>
+        <ol>
+          <li>PNG dosyasını indirin.</li>
+          <li>Aşağıdaki metni kopyalayın.</li>
+          <li>"LinkedIn'de paylaş"a basın, metni yapıştırın ve PNG görselini gönderiye ekleyin.</li>
+        </ol>
+        <textarea id="post" aria-label="Paylaşım metni"></textarea>
+        <div class="row">
+          <button class="btn ghost" id="copy">Metni kopyala</button>
+          <a class="btn li" id="lishare" target="_blank" rel="noopener">LinkedIn'de paylaş</a>
+        </div>
+        <p class="small">"LinkedIn profiline ekle" butonu sertifikayı profilinizdeki <b>Lisanslar ve sertifikalar</b> bölümüne sertifika numarası ve doğrulama bağlantısıyla ekler.</p>
+      </div>
+    </div>
+    <p class="small" style="text-align:center;margin-top:16px"><a href="./" style="color:var(--navy)">Başka bir kod gir</a></p>
+  </section>
+</main>
+<footer>
+  Eğitmen: Cemal Taner – Bilgi Güvenliği Danışmanı • ISO/IEC 27001 Denetçisi • <a href="https://www.cemaltaner.com.tr" target="_blank" rel="noopener">www.cemaltaner.com.tr</a><br>
+  Sertifikalar eğitmen tarafından düzenlenen eğitim belgeleridir; akreditasyonlu personel belgelendirmesi niteliği taşımaz.
+</footer>
+<script src="vendor/jspdf.umd.min.js"></script>
+<script src="data.js"></script>
+<script src="cert.js"></script>
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  let person = null, cur = 'B';
+  async function show(t){
+    cur = t;
+    document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.t === t));
+    await CT.draw($('cv'), t, person);
+    $('liadd').href = CT.linkedinAdd(t, person);
+    $('lishare').href = CT.linkedinShare(t, person);
+    $('verify').href = CT.verifyUrl(t, person.code);
+    $('post').value = CT.postText(t, person);
+  }
+  async function open(raw){
+    const code = CT.normCode(raw);
+    $('msg').className = 'msg'; $('msg').textContent = 'Kontrol ediliyor…'; $('go').disabled = true;
+    try {
+      person = await CT.lookup(code);
+    } catch(e){ person = null; }
+    $('go').disabled = false;
+    if(!person){ $('msg').className = 'msg err'; $('msg').textContent = 'Kod bulunamadı. Lütfen size iletilen kodu kontrol edin.'; return; }
+    $('msg').textContent = '';
+    $('login').hidden = true; $('result').hidden = false;
+    $('pname').textContent = person.name;
+    history.replaceState(null, '', '?k=' + code);
+    await show(CT.typeFromNo(raw) || 'B');
+  }
+  $('f').addEventListener('submit', e => { e.preventDefault(); open($('code').value); });
+  document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => show(b.dataset.t)));
+  $('png').addEventListener('click', () => CT.downloadPng($('cv'), cur, person));
+  $('pdf').addEventListener('click', () => CT.downloadPdf($('cv'), cur, person));
+  $('copy').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText($('post').value); } catch(e){ $('post').select(); document.execCommand('copy'); }
+    $('copy').textContent = 'Kopyalandı ✓'; setTimeout(() => $('copy').textContent = 'Metni kopyala', 2000);
+  });
+  const k = new URLSearchParams(location.search).get('k');
+  if (k) { $('code').value = k; open(k); }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sertifika Doğrulama – ISO/IEC 27001 İç Denetçi Eğitimi</title>
+<meta name="description" content="Cemal Taner tarafından düzenlenen ISO/IEC 27001:2022 İç Denetçi Eğitimi sertifikasının doğrulama sayfası.">
+<meta property="og:title" content="ISO/IEC 27001:2022 İç Denetçi Eğitimi – Sertifika Doğrulama">
+<meta property="og:description" content="Cemal Taner • 14–15 Kasım 2026 • Online canlı eğitim (12 saat)">
+<meta property="og:image" content="https://ctaner.github.io/iso27001-ic-denetci-sertifika/og-image.png">
+<meta property="og:type" content="website">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="mono">CT</div>
+  <h1>Sertifika Doğrulama</h1>
+  <p>ISO/IEC 27001:2022 İç Denetçi Eğitimi</p>
+</header>
+<main>
+  <section class="card verify">
+    <div id="state"><p>Doğrulanıyor…</p></div>
+    <div id="ok" hidden>
+      <span class="badge ok">✓ Geçerli sertifika</span>
+      <dl>
+        <dt>Ad Soyad</dt><dd id="v-name"></dd>
+        <dt>Sertifika</dt><dd id="v-type"></dd>
+        <dt>Eğitim</dt><dd>ISO/IEC 27001:2022 İç Denetçi Eğitimi</dd>
+        <dt>Tarih ve süre</dt><dd>14–15 Kasım 2026 • 2 gün (12 saat canlı çevrim içi)</dd>
+        <dt>Düzenleyen / Eğitmen</dt><dd>Cemal Taner – Bilgi Güvenliği Danışmanı, ISO/IEC 27001 Denetçisi</dd>
+        <dt>Sertifika No</dt><dd id="v-no"></dd>
+        <dt>Düzenlenme</dt><dd>15.11.2026</dd>
+      </dl>
+      <div class="preview" style="margin-top:22px"><canvas id="cv" aria-label="Sertifika görüntüsü"></canvas></div>
+    </div>
+    <div id="bad" hidden>
+      <span class="badge err">✕ Sertifika bulunamadı</span>
+      <p>Sertifika numarasını kontrol edin. Numara <b>CT-IDE-2026-B-XXXXXXXX</b> veya <b>CT-IDE-2026-K-XXXXXXXX</b> biçimindedir.</p>
+    </div>
+    <form id="f" style="margin-top:22px" autocomplete="off">
+      <label for="no">Sertifika numarası</label>
+      <input id="no" type="text" placeholder="CT-IDE-2026-B-XXXXXXXX" spellcheck="false" style="font-size:17px;letter-spacing:1px">
+      <button class="btn primary" type="submit">Doğrula</button>
+    </form>
+  </section>
+</main>
+<footer>
+  <a href="https://www.cemaltaner.com.tr" target="_blank" rel="noopener">www.cemaltaner.com.tr</a><br>
+  Sertifikalar eğitmen tarafından düzenlenen eğitim belgeleridir; akreditasyonlu personel belgelendirmesi niteliği taşımaz.
+</footer>
+<script src="data.js"></script>
+<script src="cert.js"></script>
+<script>
+(async function(){
+  const $ = id => document.getElementById(id);
+  const no = (new URLSearchParams(location.search).get('no') || '').toUpperCase();
+  $('f').addEventListener('submit', e => { e.preventDefault(); location.search = '?no=' + encodeURIComponent($('no').value.trim().toUpperCase()); });
+  if (!no) { $('state').innerHTML = '<p>Doğrulamak istediğiniz sertifikanın numarasını girin.</p>'; return; }
+  $('no').value = no;
+  const t = CT.typeFromNo(no);
+  let p = null;
+  try { if (t) p = await CT.lookup(CT.normCode(no)); } catch(e) {}
+  $('state').hidden = true;
+  if (!p) { $('bad').hidden = false; return; }
+  $('ok').hidden = false;
+  $('v-name').textContent = p.name;
+  $('v-type').textContent = CT.TYPES[t].short;
+  $('v-no').textContent = CT.certNo(t, p.code);
+  document.title = `${p.name} – ${CT.TYPES[t].short} | Doğrulama`;
+  await CT.draw($('cv'), t, p);
+})();
+</script>
+</body>
+</html>
