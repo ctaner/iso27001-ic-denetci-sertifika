@@ -5,7 +5,7 @@
   const COURSE = 'ISO/IEC 27001:2022 İç Denetçi Eğitimi';
   const ISSUER = 'Cemal Taner';
   const DATES = '14.11.2026 – 15.11.2026';
-  const ISSUED = '15.11.2026';
+  const ISSUED = '23.11.2026';
   const enc = new TextEncoder();
 
   const TYPES = {
@@ -151,9 +151,7 @@
 
     // altbilgi
     c.fillStyle = muted; c.font = `400 24px ${SANS}`;
-    c.fillText('Doğrulama: ' + verifyUrl(t, person.code).replace('https://', '') + '   •   www.cemaltaner.com.tr', W / 2, H - 122);
-    c.font = `400 21px ${SANS}`;
-    c.fillText('Bu belge eğitmen tarafından düzenlenen eğitim katılım/başarı belgesidir; akreditasyonlu personel belgelendirmesi niteliği taşımaz.', W / 2, H - 92);
+    c.fillText('Doğrulama: ' + verifyUrl(t, person.code).replace('https://', '') + '   •   www.cemaltaner.com.tr', W / 2, H - 104);
     return canvas;
   }
 
